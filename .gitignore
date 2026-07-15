@@ -1,0 +1,45 @@
+# ── Environment & secrets ─────────────────────────────
+.env
+_env
+*.env
+
+# ── Python ─────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# ── Virtual environment ────────────────────────────────
+venv/
+env/
+.venv/
+ENV/
+
+# ── App-generated data (persisted chat history & files) ─
+flowmind.db
+flowmind.db-journal
+vector_stores/
+source_files/
+
+# ── Streamlit ───────────────────────────────────────────
+.streamlit/secrets.toml
+
+# ── IDE / editor ────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+
+# ── OS files ────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Temp / uploads ──────────────────────────────────────
+*.tmp
+temp/
+tmp/
+
+# ── Logs ────────────────────────────────────────────────
+*.log
