@@ -1,5 +1,7 @@
-import json
 import os
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+
+import json
 import tempfile
 import time
 
@@ -9,6 +11,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 
 from pdf_loader import load_documents
 from rag_pipeline import create_vectorstore, get_embeddings_model
+from tools.router import select_tool
 import chat_store
 
 load_dotenv()
@@ -739,10 +742,46 @@ if st.session_state.quick_question:
 # ─────────────────────────────────────────────
 
 if question:
-    if st.session_state.db is None:
-        st.warning("⚠️ Please upload documents first.")
+
+    # 🧠 AI Productivity Assistant - Tool Router
+    selected_tool = select_tool(question)
+
+    if selected_tool != "rag":
+
+        with st.spinner("Running AI tool..."):
+
+            # First retrieve document context
+            retrieved_docs = st.session_state.db.max_marginal_relevance_search(
+                question, k=5, fetch_k=20
+            )
+
+            context = "\n\n".join(
+                [d.page_content for d in retrieved_docs]
+            )
+
+            if selected_tool == "summary":
+                from tools.summary_tool import summarize_document
+                answer = summarize_document(context)
+
+            elif selected_tool == "email":
+                from tools.email_tool import generate_email
+                answer = generate_email(context)
+
+            elif selected_tool == "todo":
+                from tools.todo_tool import generate_todo
+                answer = generate_todo(context)
+
+            elif selected_tool == "workflow":
+                from tools.workflow import run_workflow
+                answer = run_workflow(context)
+
+        st.chat_message("assistant").markdown(answer)
+
     else:
-        st.session_state.queries += 1
+        if st.session_state.db is None:
+            st.warning("⚠️ Please upload documents first.")
+        else:
+            st.session_state.queries += 1
 
         with st.spinner("Searching your documents…"):
             # ✅ FIX 4: Store retrieved docs to avoid double MMR search
